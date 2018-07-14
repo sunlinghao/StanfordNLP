@@ -1,0 +1,44 @@
+最后一个单词对应
+
+中文虚词连接
+
+the electromechanical equipment housing
+do not deal allhousing
+# housing 翻译不对
+设备
+1
+electrical equipment
+finish
+用电设备
+2
+fire-fighting equipment
+finish
+消防器材
+3
+the operation and maintenance personnel
+finish
+运行维护人员
+4
+the heating system
+finish
+对供热系统
+5
+structure , building structure and various valve , guardrail , ladder , pipe
+do not deal all, pipe
+构筑物、建筑物结构及各种阀门、护栏、爬梯
+structure , building , and automatic control system
+finish
+构筑物、建筑物、自控系统
+7
+instrument and meter
+finish
+仪器、仪表
+8
+they
+do not deal allthey
+
+9
+the residential house
+finish
+，民用住宅
+10
