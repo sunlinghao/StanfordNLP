@@ -2,6 +2,7 @@ from pyltp import Segmentor
 from pyltp import Postagger
 import os
 import jieba
+from count_words import get_counts
 
 LTP_DATA_DIR = '/Users/sunlinghao/PycharmProjects/StanfordNLP/ltp_data_v3.4.0'
 cws_model_path = os.path.join(LTP_DATA_DIR, 'cws.model')
@@ -11,8 +12,9 @@ seg = Segmentor()
 seg.load(cws_model_path)
 words = seg.segment(sents)
 seg.release()
-words_ls = " ".join(words)
-c = words_ls.count()
+words_ls = list(words)
+print(words_ls)
+c = get_counts(words_ls)
 print(c)
 print(" ".join(jieba.cut(sents)))
 pos = Postagger()
