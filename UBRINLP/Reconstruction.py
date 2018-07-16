@@ -174,6 +174,7 @@ class UBRINlpExtractor:
         seg = Segmentor()
         seg.load(cws_model_path)
         chi_seg = list(seg.segment(self.sentence))
+        seg.release()
         # chi_seg = jieba.cut(self.sentence)
         # chi_seg = list(chi_seg)
         en_seg = []
@@ -223,7 +224,9 @@ class UBRINlpExtractor:
                         # 中文中的介词在英文中没有翻译（目前还没有遇到在词语内没有翻译的）
                         # if en_pos[zh_index - process_index][1] == 'IN' and en_index < zh_index - last_word_index - 1:
                         #     entity_list.insert(0,chi_seg[zh_index - process_index-1])
-
+                        #开头为 "的"，英文中无翻译
+                        if chi_seg[zh_index-process_index] == "的":
+                            entity_list.append(chi_seg[zh_index - process_index-1])
 
                         entity_list.append(chi_seg[zh_index - process_index])
                         last_word_index += 1
@@ -307,11 +310,11 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "管道共建各参建方应明确管道段落的起吃点、建设路由、管孔数、管孔规格、段长、人（手）孔设置、材料和工期安排。"
+    s = "基础的混凝土强度等级、配筋等应符合设计规定。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
-    # test.drawTree()
+    test.drawTree()
     result = test.get_trans(node)
     # print(result)
     print(test.get_original_entity())
