@@ -8,7 +8,7 @@ pos_model_path = os.path.join(LTP_DATA_DIR, 'pos.model')
 sents = '管道共建各参建方应明确管道段落的起吃点、建设路由、管孔数、管孔规格、段长、人（手）孔设置、材料和工期安排。'
 seg = Segmentor()
 seg.load(cws_model_path)
-words = seg.segment(sents)
+words = seg.segment("完工的隧道")
 seg.release()
 print(" ".join(words))
 print(" ".join(jieba.cut(sents)))
@@ -16,4 +16,5 @@ pos = Postagger()
 words = ['的']
 pos.load(pos_model_path)
 print(list(pos.postag(words)))
+print("master")
 
