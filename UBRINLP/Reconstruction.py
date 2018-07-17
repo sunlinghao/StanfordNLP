@@ -184,6 +184,7 @@ class UBRINlpExtractor:
             for word in en_phrase.split():
                 word = lemma.lemmatize(word.lower())
                 zh_word_lemma.append(word)
+            zh_word_lemma = " ".join(zh_word_lemma)
             en_seg.append(zh_word_lemma)
         # print(en_seg)
         en_pos = pos_tag(en_seg)
@@ -319,7 +320,7 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "管道共建各参建方应明确管道段落的起吃点、建设路由、管孔数、管孔规格、段长、人（手）孔设置、材料和工期安排。"
+    s = "在日平均气温5℃的情况下浇筑混凝土，应采取保温为主的蓄热法措施防冻。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
