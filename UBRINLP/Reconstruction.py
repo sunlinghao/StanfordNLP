@@ -180,7 +180,11 @@ class UBRINlpExtractor:
 
         for chi_phrase in chi_seg:
             en_phrase = self.trans.translate(chi_phrase, src='zh-cn').text
-            en_seg.append(en_phrase)
+            zh_word_lemma=[]
+            for word in en_phrase.split():
+                word = lemma.lemmatize(word.lower())
+                zh_word_lemma.append(word)
+            en_seg.append(zh_word_lemma)
         # print(en_seg)
         en_pos = pos_tag(en_seg)
 
@@ -189,21 +193,28 @@ class UBRINlpExtractor:
         zh_index = 0
         last_word_index = -1
         for phrase in zip(chi_seg,en_pos):
-            for word in phrase[1][0].split():
+            trans_ls = phrase[1][0].split()
+            is_add = False
+            for word in trans_ls:
                 # 连词和介词出现次数太多，不做评价标准
                 if phrase[1][1] == 'CC' or phrase[1][1] == 'IN':
                     continue
                 # 不太需要
                 # if pos_tag([word])[0][1] == 'CC':
                 #     continue
-                # lemmatize
-                word = lemma.lemmatize(word.lower())
+
                 # 限定词语出现在实体中的位置  （翻译的时候不会主语后置）
                 en_entity_domain = en_entity_list[:zh_index+5]
 
                 if word in en_entity_domain:
                     # 得到英文翻译在英文实体中的位置
                     en_index = en_entity_list.index(word)
+                    # 处理大词翻译前面没有对上的情况  eg Thermal storage method heat storage method  第二个词才对上，不会向前寻找
+                    if not is_add:
+                        seg_index = trans_ls.index(word)
+                        seg_index = en_index - seg_index
+                    else:
+                        seg_index = en_index
                     # 处理index 与 真正的index
                     process_index = en_index
                     # 英文单词数多于中文时，保证不会选到之前的中文
@@ -216,7 +227,7 @@ class UBRINlpExtractor:
                     if pos_deal[0][1] == 'DT':
                         dt = True
                     if dt:
-                        dt_index = en_index - 1
+                        dt_index = seg_index - 1
                         process_index = min(process_index,dt_index)
                     # 加入之前未识别单词
                     while process_index > 0:
@@ -240,6 +251,7 @@ class UBRINlpExtractor:
                         if last_word_index + 1 != zh_index:
                             print("not equal")
                         last_word_index = zh_index
+                        is_add = True
                     # 删除已经匹配的entity
                     en_entity_list = en_entity_list[en_index + 1:]
                     en_entity_str = " ".join(en_entity_list)
@@ -307,11 +319,11 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "在日平均气温5℃的情况下浇筑混凝土，应采取保温为主的蓄热法措施防冻。"
+    s = "管道共建各参建方应明确管道段落的起吃点、建设路由、管孔数、管孔规格、段长、人（手）孔设置、材料和工期安排。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
-    test.drawTree()
+    # test.drawTree()
     result = test.get_trans(node)
     # print(result)
     print(test.get_original_entity())

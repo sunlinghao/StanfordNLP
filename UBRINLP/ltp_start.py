@@ -3,6 +3,7 @@ from pyltp import Postagger
 import os
 import jieba
 from count_words import get_counts
+from nltk.stem import WordNetLemmatizer
 
 LTP_DATA_DIR = '/Users/sunlinghao/PycharmProjects/StanfordNLP/ltp_data_v3.4.0'
 cws_model_path = os.path.join(LTP_DATA_DIR, 'cws.model')
@@ -22,3 +23,8 @@ words = ['的']
 pos.load(pos_model_path)
 print(list(pos.postag(words)))
 
+
+ls = 'participating'
+lemma = WordNetLemmatizer()
+ls = lemma.lemmatize(ls)
+print(ls)
