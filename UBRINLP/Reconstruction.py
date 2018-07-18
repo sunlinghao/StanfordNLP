@@ -159,6 +159,8 @@ class UBRINlpExtractor:
             print("指代消解")
             clause_node = self.get_clause_node()
             S_node = self.get_S(clause_node)
+            if S_node is None:
+                S_node = clause_node
             np_node = self.find_entity_from_PP(S_node)
             print(np_node.leaves())
             # 转换为小写
@@ -174,6 +176,7 @@ class UBRINlpExtractor:
         seg = Segmentor()
         seg.load(cws_model_path)
         chi_seg = list(seg.segment(self.sentence))
+        seg.release()
         # chi_seg = jieba.cut(self.sentence)
         # chi_seg = list(chi_seg)
         en_seg = []
@@ -310,8 +313,6 @@ class UBRINlpExtractor:
                     result = tmp_result
             if result:
                 break
-        if result is None:
-            return node
         return result
 
 
@@ -320,7 +321,7 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "在日平均气温5℃的情况下浇筑混凝土，应采取保温为主的蓄热法措施防冻。"
+    s = "对管道、管路附件、设备和支架安装后无法涂刷或不易涂刷涂料的部位，安装前应预先涂刷。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
