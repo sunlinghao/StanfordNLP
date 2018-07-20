@@ -236,12 +236,15 @@ class UBRINlpExtractor:
                         dt_index -= 1
                     process_index = min(secure_index, dt_index)
                     # 加入之前未识别单词
+                    # "的" 的影响只能添加一次
+                    has_patch = False
                     while process_index > 0:
-                        if secure_index > dt_index:
-                            # 中文中的介词在英文中没有翻译（"基础的混凝土强度"， "的"没有翻译）
-                            if en_pos[zh_index - process_index][1] == 'IN':
-                                entity_list.append(chi_seg[zh_index - process_index-1])
 
+                        if secure_index > dt_index and (not has_patch):
+                            # 中文中的介词在英文中没有翻译（"基础的混凝土强度"， "的"没有翻译）  有没有可能重复？
+                            if en_pos[zh_index - process_index][1] == 'IN':
+                                entity_list.insert(0, chi_seg[zh_index - dt_index - 1])
+                                has_patch = True
 
                         entity_list.append(chi_seg[zh_index - process_index])
                         last_word_index += 1
@@ -324,7 +327,7 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "管堵头与管孔间必须堵塞紧密，拉脱力不得小于SNe。"
+    s = "基础的混凝土强度等级、配筋等应符合设计规定。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
