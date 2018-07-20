@@ -172,6 +172,7 @@ class UBRINlpExtractor:
                 temp_lemma_list.append(word_lemma)
             en_entity_str = " ".join(temp_lemma_list)
             en_entity_list = temp_lemma_list
+
         # 中文分句
         seg = Segmentor()
         seg.load(cws_model_path)
@@ -213,31 +214,33 @@ class UBRINlpExtractor:
                 if word in en_entity_domain:
                     # 得到英文翻译在英文实体中的位置
                     en_index = en_entity_list.index(word)
-                    # 处理大词翻译前面没有对上的情况  eg Thermal storage method heat storage method  第二个词才对上，不会向前寻找
+                    # 处理大词翻译前面没有对上的情况  eg Thermal storage method / heat storage method  第二个词才对上，不会向前寻找
                     if not is_add:
+                        # trans_ls 中文翻译列表
                         seg_index = trans_ls.index(word)
                         seg_index = en_index - seg_index
                     else:
                         seg_index = en_index
-                    # 处理index 与 真正的index
-                    process_index = en_index
+
                     # 英文单词数多于中文时，保证不会选到之前的中文
-                    if en_index > zh_index - last_word_index - 1:
-                        process_index = zh_index - last_word_index - 1
+                    # if en_index > zh_index - last_word_index - 1:
+                    secure_index = zh_index - last_word_index - 1
 
                     # 处理英文冠词在开头
                     dt = False
+                    dt_index = seg_index
                     pos_deal = pos_tag(en_entity_list[0:1])
                     if pos_deal[0][1] == 'DT':
                         dt = True
                     if dt:
-                        dt_index = seg_index - 1
-                        process_index = min(process_index,dt_index)
+                        dt_index -= 1
+                    process_index = min(secure_index, dt_index)
                     # 加入之前未识别单词
                     while process_index > 0:
-                        # 中文中的介词在英文中没有翻译（目前还没有遇到在词语内没有翻译的）
-                        # if en_pos[zh_index - process_index][1] == 'IN' and en_index < zh_index - last_word_index - 1:
-                        #     entity_list.insert(0,chi_seg[zh_index - process_index-1])
+                        if secure_index > dt_index:
+                            # 中文中的介词在英文中没有翻译（"基础的混凝土强度"， "的"没有翻译）
+                            if en_pos[zh_index - process_index][1] == 'IN':
+                                entity_list.append(chi_seg[zh_index - process_index-1])
 
 
                         entity_list.append(chi_seg[zh_index - process_index])
@@ -321,7 +324,7 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "对管道、管路附件、设备和支架安装后无法涂刷或不易涂刷涂料的部位，安装前应预先涂刷。"
+    s = "管堵头与管孔间必须堵塞紧密，拉脱力不得小于SNe。"
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
