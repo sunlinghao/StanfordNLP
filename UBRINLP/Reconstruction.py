@@ -214,10 +214,10 @@ class UBRINlpExtractor:
                 # 放在此处可以让zh_index正常计数
                 if phrase[1][1] == 'CC' or phrase[1][1] == 'IN':
                     continue
-                # 不太需要
+                # 不太需要  连词过多  无法划分时需要
                 # if pos_tag([word])[0][1] == 'CC':
                 #     continue
-                t_p = pos_tag([word])
+
                 # 限定词语出现在实体中的位置  （翻译的时候不会主语后置）
                 en_entity_domain = en_entity_list[:zh_index+5]
 
