@@ -179,7 +179,7 @@ class UBRINlpExtractor:
         pos_deal = pos_tag(en_entity_list[0:1])
         if pos_deal[0][1] == 'DT':
             en_entity_list = en_entity_list[1:]
-
+            en_entity_str = " ".join(en_entity_list)
 
         # 中文分句
         seg = Segmentor()
@@ -188,8 +188,9 @@ class UBRINlpExtractor:
         seg.release()
         # chi_seg = jieba.cut(self.sentence)
         # chi_seg = list(chi_seg)
-        en_seg = []
 
+        # 逐词翻译
+        en_seg = []
         for chi_phrase in chi_seg:
             en_phrase = self.trans.translate(chi_phrase, src='zh-cn').text
             zh_word_lemma=[]
@@ -199,10 +200,17 @@ class UBRINlpExtractor:
             zh_word_lemma = " ".join(zh_word_lemma)
             en_seg.append(zh_word_lemma)
         # print(en_seg)
+        # 标注翻译后的英文词性
         en_pos = pos_tag(en_seg)
 
-
         entity_list = []
+        # 直接能在分次后翻译的句子中找到实体原词
+        en_seg_sentence = " ".join(en_seg)
+        if en_entity_str in en_seg_sentence:
+            for word in en_entity_list:
+                entity_list.append(chi_seg[en_seg.index(word)])
+            return "".join(entity_list)
+
         zh_index = 0
         last_word_index = -1
         for phrase in zip(chi_seg,en_pos):
@@ -275,7 +283,6 @@ class UBRINlpExtractor:
                     en_entity_list = en_entity_list[en_index + 1:]
                     en_entity_str = " ".join(en_entity_list)
 
-
             # 中文单词位置 + 1
             zh_index += 1
             if not en_entity_list:
@@ -336,7 +343,8 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = '.：！（加~管.从在管外嗖ii">给水管在热力管沟F1l管道与其他管线及建｛构｝筑物之间的水平净距和l垂直净距.应符合现行同家标准《室外给水设计规范》GB50013的有关规定。'
+    # s = '当对螺纹接头采用密封焊时，外露螺纹应全部密封焊。'
+    s = '基础的混凝土强度等级、配筋等应符合设计规定。'
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
