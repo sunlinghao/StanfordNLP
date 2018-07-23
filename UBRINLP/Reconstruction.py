@@ -248,11 +248,14 @@ class UBRINlpExtractor:
 
                         if secure_index > seg_index and (not has_patch):
                             # 中文中的介词在英文中没有翻译（"基础的混凝土强度"， "的"没有翻译）  有没有可能重复？
-                            if en_pos[zh_index - process_index][1] == 'IN':
+                            # print(pos_tag())
+                            if en_pos[zh_index - process_index][1] == 'IN' and en_pos[zh_index - seg_index - 1][1] != "IN":
+                                # print(en_pos[zh_index - seg_index - 1])
                                 entity_list.insert(0, chi_seg[zh_index - seg_index - 1])
                                 has_patch = True
 
                         entity_list.append(chi_seg[zh_index - process_index])
+
                         last_word_index += 1
 
                         process_index -= 1
@@ -333,7 +336,7 @@ class UBRINlpExtractor:
 
 
 if __name__ == '__main__':
-    s = "管堵头与管孔间必须堵塞紧密，拉脱力不得小于SNe。"
+    s = '.：！（加~管.从在管外嗖ii">给水管在热力管沟F1l管道与其他管线及建｛构｝筑物之间的水平净距和l垂直净距.应符合现行同家标准《室外给水设计规范》GB50013的有关规定。'
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
