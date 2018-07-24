@@ -14,7 +14,8 @@ from pyltp import Segmentor
 
 LTP_DATA_DIR = '/Users/sunlinghao/PycharmProjects/StanfordNLP/ltp_data_v3.4.0'
 cws_model_path = os.path.join(LTP_DATA_DIR, 'cws.model')
-
+seg = Segmentor()
+seg.load(cws_model_path)
 
 class UBRINlpExtractor:
 
@@ -182,10 +183,9 @@ class UBRINlpExtractor:
             en_entity_str = " ".join(en_entity_list)
 
         # 中文分句
-        seg = Segmentor()
-        seg.load(cws_model_path)
+
         chi_seg = list(seg.segment(self.sentence))
-        seg.release()
+        # seg.release()
         # chi_seg = jieba.cut(self.sentence)
         # chi_seg = list(chi_seg)
 
