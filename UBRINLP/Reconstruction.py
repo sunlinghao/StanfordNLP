@@ -6,7 +6,6 @@ import nltk
 import queue
 import jieba
 from nltk.stem import WordNetLemmatizer
-from nltk.stem import PorterStemmer
 from nltk import pos_tag
 from nltk.parse.stanford import StanfordParser
 from nltk.tokenize.stanford import StanfordTokenizer
@@ -150,7 +149,6 @@ class UBRINlpExtractor:
         en_entity_list = " ".join(en_entity.leaves()).lower().split()
         # Lemmatizer
         lemma = WordNetLemmatizer()
-        stem = PorterStemmer()
         temp_lemma_list = []
         for word in en_entity_list:
             word_lemma = lemma.lemmatize(word)
@@ -197,7 +195,7 @@ class UBRINlpExtractor:
             en_phrase = self.trans.translate(chi_phrase, src='zh-cn').text
             zh_word_lemma=[]
             for word in en_phrase.split():
-                word = stem.stem(lemma.lemmatize(word))
+                word = lemma.lemmatize(word.lower())
                 zh_word_lemma.append(word)
             zh_word_lemma = " ".join(zh_word_lemma)
             en_seg.append(zh_word_lemma)
@@ -263,13 +261,13 @@ class UBRINlpExtractor:
                         if secure_index > seg_index and (not has_patch):
                             # 中文中的介词在英文中没有翻译（"基础的混凝土强度"， "的"没有翻译）  有没有可能重复？
                             # print(pos_tag())
-                            if en_pos[zh_index - process_index][1] == 'IN' and en_pos[zh_index - seg_index - 1][1] != "IN":
+                            if en_pos[zh_index - process_index][1] == 'IN' and en_pos[zh_index - seg_index - 1][1] != "IN" and en_pos[zh_index - seg_index - 1][1] != "IN" and en_pos[zh_index - seg_index - 1][1] != ",":
                                 # print(en_pos[zh_index - seg_index - 1])
                                 entity_list.insert(0, chi_seg[zh_index - seg_index - 1])
                                 has_patch = True
                         if entity_list:
                             entity_list.append(chi_seg[zh_index - process_index])
-                        elif pos_tag(en_pos[zh_index - process_index])[0][1] != "," and pos_tag(en_pos[zh_index - process_index])[0][1] != "IN":
+                        elif en_pos[zh_index - process_index][1] != "," and en_pos[zh_index - process_index][1] != "IN":
                             entity_list.append(chi_seg[zh_index - process_index])
 
                         last_word_index += 1
@@ -355,7 +353,7 @@ class UBRINlpExtractor:
 if __name__ == '__main__':
     # s = '当对螺纹接头采用密封焊时，外露螺纹应全部密封焊。'
     # s = '基础的混凝土强度等级、配筋等应符合设计规定。'
-    s = '原有管道预处理后，宜进行电视检测（CCTV)，人工可进人的管道也可采取管内目测进行检查。'
+    s = '露天设置的可燃气体探测器，应采取防晒和防雨淋措施。'
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
