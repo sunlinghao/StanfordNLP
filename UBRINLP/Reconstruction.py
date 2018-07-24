@@ -223,8 +223,8 @@ class UBRINlpExtractor:
                 if phrase[1][1] == 'CC' or phrase[1][1] == 'IN':
                     continue
                 # 不太需要  连词过多  无法划分时需要
-                # if pos_tag([word])[0][1] == 'CC':
-                #     continue
+                if pos_tag([word])[0][1] == 'CC' or pos_tag([word])[0][1] == ",":
+                    continue
 
                 # 限定词语出现在实体中的位置  （翻译的时候不会主语后置）
                 en_entity_domain = en_entity_list[:zh_index+5]
@@ -318,24 +318,24 @@ class UBRINlpExtractor:
 
     def get_S(self,node):
         """
-                 Depth first searching find the first minimum S in the node by BFS
-                 :return:
-                 """
-        if(node == None):
+        Breadth first searching find the first S in the node by BFS
+        :return:
+        """
+        if node == None:
             node = self.tree
-        result = None
-        for child in node:
-            if isinstance(child, nltk.tree.Tree):
-                if child.label() == "S":
-                    # 将np节点赋予结果
-                    result = child
-                tmp_result = self.get_S(child)
-                # 存在更小的np
-                if tmp_result:
-                    result = tmp_result
-            if result:
-                break
-        return result
+        q = queue.Queue()
+        q.put(node)
+        while not q.empty():
+
+            now_node = q.get_nowait()
+
+            for child in now_node:
+                if isinstance(child, nltk.tree.Tree):
+                    if child.label() == "S":
+                        return child
+                    else:
+                        q.put(child)
+        return node
 
 
 
@@ -344,11 +344,12 @@ class UBRINlpExtractor:
 
 if __name__ == '__main__':
     # s = '当对螺纹接头采用密封焊时，外露螺纹应全部密封焊。'
-    s = '基础的混凝土强度等级、配筋等应符合设计规定。'
+    # s = '基础的混凝土强度等级、配筋等应符合设计规定。'
+    s = '新建道路及交通繁忙、支管弯管少、不易开挖等地区给水管道的修复更新，宜选用非开挖修复技术。'
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
-    # test.drawTree()
+    test.drawTree()
     result = test.get_trans(node)
     # print(result)
     print(test.get_original_entity())
