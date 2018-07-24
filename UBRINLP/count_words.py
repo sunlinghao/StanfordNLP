@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-
 def get_counts(sequence):
     # 所有值被初始化为0
     counts = defaultdict(int)

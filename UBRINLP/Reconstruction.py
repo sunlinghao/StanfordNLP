@@ -6,6 +6,7 @@ import nltk
 import queue
 import jieba
 from nltk.stem import WordNetLemmatizer
+from nltk.stem import PorterStemmer
 from nltk import pos_tag
 from nltk.parse.stanford import StanfordParser
 from nltk.tokenize.stanford import StanfordTokenizer
@@ -149,9 +150,10 @@ class UBRINlpExtractor:
         en_entity_list = " ".join(en_entity.leaves()).lower().split()
         # Lemmatizer
         lemma = WordNetLemmatizer()
+        stem = PorterStemmer()
         temp_lemma_list = []
         for word in en_entity_list:
-            word_lemma = lemma.lemmatize(word)
+            word_lemma = stem.stem(lemma.lemmatize(word))
             temp_lemma_list.append(word_lemma)
         en_entity_str = " ".join(temp_lemma_list)
         en_entity_list = temp_lemma_list
@@ -169,7 +171,7 @@ class UBRINlpExtractor:
             # Lemmatizer
             temp_lemma_list = []
             for word in en_entity_list:
-                word_lemma = lemma.lemmatize(word)
+                word_lemma = stem.stem(lemma.lemmatize(word))
                 temp_lemma_list.append(word_lemma)
             en_entity_str = " ".join(temp_lemma_list)
             en_entity_list = temp_lemma_list
@@ -195,7 +197,7 @@ class UBRINlpExtractor:
             en_phrase = self.trans.translate(chi_phrase, src='zh-cn').text
             zh_word_lemma=[]
             for word in en_phrase.split():
-                word = lemma.lemmatize(word.lower())
+                word = stem.stem(lemma.lemmatize(word))
                 zh_word_lemma.append(word)
             zh_word_lemma = " ".join(zh_word_lemma)
             en_seg.append(zh_word_lemma)
@@ -205,8 +207,12 @@ class UBRINlpExtractor:
 
         entity_list = []
         # 直接能在分次后翻译的句子中找到实体原词
-        en_seg_sentence = " ".join(en_seg)
-        if en_entity_str in en_seg_sentence:
+        has_origin_word = True
+        for e in en_entity_list:
+            if e not in en_seg:
+                has_origin_word = False
+                break
+        if has_origin_word:
             for word in en_entity_list:
                 entity_list.append(chi_seg[en_seg.index(word)])
             return "".join(entity_list)
@@ -316,6 +322,8 @@ class UBRINlpExtractor:
                     else:
                         q.put(child)
 
+        return node
+
     def get_S(self,node):
         """
         Breadth first searching find the first S in the node by BFS
@@ -345,11 +353,11 @@ class UBRINlpExtractor:
 if __name__ == '__main__':
     # s = '当对螺纹接头采用密封焊时，外露螺纹应全部密封焊。'
     # s = '基础的混凝土强度等级、配筋等应符合设计规定。'
-    s = '新建道路及交通繁忙、支管弯管少、不易开挖等地区给水管道的修复更新，宜选用非开挖修复技术。'
+    s = '原有管道预处理后，宜进行电视检测（CCTV)，人工可进人的管道也可采取管内目测进行检查。'
     # print(s)
     test = UBRINlpExtractor(s)
     node = test.find_entity_from_PP()
-    test.drawTree()
+    # test.drawTree()
     result = test.get_trans(node)
     # print(result)
     print(test.get_original_entity())
