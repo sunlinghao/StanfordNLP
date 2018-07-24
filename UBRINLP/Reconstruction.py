@@ -153,7 +153,7 @@ class UBRINlpExtractor:
         stem = PorterStemmer()
         temp_lemma_list = []
         for word in en_entity_list:
-            word_lemma = stem.stem(lemma.lemmatize(word))
+            word_lemma = lemma.lemmatize(word)
             temp_lemma_list.append(word_lemma)
         en_entity_str = " ".join(temp_lemma_list)
         en_entity_list = temp_lemma_list
@@ -171,7 +171,7 @@ class UBRINlpExtractor:
             # Lemmatizer
             temp_lemma_list = []
             for word in en_entity_list:
-                word_lemma = stem.stem(lemma.lemmatize(word))
+                word_lemma = lemma.lemmatize(word)
                 temp_lemma_list.append(word_lemma)
             en_entity_str = " ".join(temp_lemma_list)
             en_entity_list = temp_lemma_list
@@ -267,8 +267,10 @@ class UBRINlpExtractor:
                                 # print(en_pos[zh_index - seg_index - 1])
                                 entity_list.insert(0, chi_seg[zh_index - seg_index - 1])
                                 has_patch = True
-
-                        entity_list.append(chi_seg[zh_index - process_index])
+                        if entity_list:
+                            entity_list.append(chi_seg[zh_index - process_index])
+                        elif pos_tag(en_pos[zh_index - process_index])[0][1] != "," and pos_tag(en_pos[zh_index - process_index])[0][1] != "IN":
+                            entity_list.append(chi_seg[zh_index - process_index])
 
                         last_word_index += 1
 
